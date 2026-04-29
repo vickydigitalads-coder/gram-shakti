@@ -3,93 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gram Shakti - ग्राम शक्ति</title>
-    <!-- ब्लॉगर में इस्तेमाल के लिए style.css का कोड यहाँ <style> टैग के अंदर डालें -->
-    <link rel="stylesheet" href="style.css">
+    <title>Gram Shakti - गाँव का डिजिटल पोर्टल</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #1b5e20;
+            --primary-light: #4caf50;
+            --accent: #ff9800;
+            --white: #ffffff;
+            --shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Hind', sans-serif; }
+        body { background-color: #f0f2f5; display: flex; justify-content: center; }
+
+        #app {
+            max-width: 500px; width: 100%; background: #f4f7f6;
+            min-height: 100vh; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.1);
+        }
+
+        /* Premium Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white; padding: 40px 20px 50px; text-align: center;
+            border-radius: 0 0 40px 40px; box-shadow: var(--shadow);
+        }
+        .logo h1 { font-size: 2.2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+
+        /* Floating Navigation */
+        .main-tabs {
+            display: flex; margin: -30px 25px 20px; background: white;
+            padding: 8px; border-radius: 20px; box-shadow: var(--shadow);
+            z-index: 10; position: relative;
+        }
+        .main-tabs button {
+            flex: 1; padding: 15px; border: none; background: none;
+            font-size: 1.1rem; font-weight: 700; color: #718096; cursor: pointer;
+            border-radius: 15px; transition: 0.3s;
+        }
+        .main-tabs button.active { background: var(--primary); color: white; }
+
+        /* Card & Content */
+        .tab-content { padding: 0 20px 100px; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h2 { color: var(--primary); margin-bottom: 20px; border-left: 5px solid var(--accent); padding-left: 12px; }
+
+        /* Inputs */
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-weight: 700; margin-bottom: 8px; color: #333; }
+        .input-group input, .input-group select {
+            width: 100%; padding: 15px; border: 2px solid #eee;
+            border-radius: 12px; font-size: 1rem; transition: 0.3s;
+        }
+        .input-group input:focus { border-color: var(--primary-light); outline: none; background: #f9fff9; }
+
+        /* Buttons */
+        .btn-search { 
+            width: 100%; padding: 18px; border: none; border-radius: 12px;
+            font-weight: 800; font-size: 1.2rem; cursor: pointer;
+            background: linear-gradient(to right, var(--accent), #e68a00); color: white;
+            box-shadow: 0 6px 15px rgba(255, 152, 0, 0.3);
+        }
+        .btn-primary { 
+            width: 100%; padding: 18px; border: none; border-radius: 12px;
+            font-weight: 800; font-size: 1.2rem; cursor: pointer;
+            background: linear-gradient(to right, var(--primary), var(--primary-light)); color: white;
+            box-shadow: 0 6px 15px rgba(27, 94, 32, 0.3);
+        }
+
+        /* Map Design */
+        #map-container { 
+            height: 300px; margin: 20px 0; border-radius: 20px; 
+            overflow: hidden; border: 5px solid white; box-shadow: var(--shadow);
+            display: block; /* Hamesha dikhega but height search ke baad sahi hogi */
+        }
+        #map { height: 100%; width: 100%; z-index: 1; }
+        
+        /* Result Cards */
+        .worker-card {
+            background: white; border-radius: 18px; padding: 20px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04); border-bottom: 4px solid #eee;
+        }
+        .call-btn {
+            background: #25D366; color: white; padding: 12px 22px;
+            border-radius: 50px; text-decoration: none; font-weight: 800;
+        }
+        .footer { padding: 30px; text-align: center; color: #888; font-size: 0.9rem; }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="logo">
-                <span class="icon">🌾</span>
-                <h1>Gram Shakti</h1>
+
+<div id="app">
+    <header class="header">
+        <div class="logo"><h1>🌾 Gram Shakti</h1></div>
+        <p class="tagline">गाँव की शक्ति, गाँव का विकास</p>
+    </header>
+
+    <nav class="main-tabs">
+        <button onclick="showTab('search')" id="tab-search" class="active">वर्कर ढूँढें</button>
+        <button onclick="showTab('register')" id="tab-register">रजिस्ट्रेशन</button>
+    </nav>
+
+    <section id="search-section" class="tab-content">
+        <div class="card">
+            <div class="input-group">
+                <label>पिनकोड (Pincode)</label>
+                <input type="text" id="search-pincode" onblur="fetchVillages('search')" placeholder="6 अंकों का कोड">
             </div>
-            <p class="tagline">गाँव की शक्ति, गाँव का विकास</p>
-        </header>
-
-        <!-- Main Navigation -->
-        <nav class="main-tabs">
-            <button onclick="showTab('search')" id="tab-search" class="active">काम ढूँढें</button>
-            <button onclick="showTab('register')" id="tab-register">रजिस्ट्रेशन</button>
-        </nav>
-
-        <!-- Registration Tab -->
-        <section id="register-section" class="tab-content" style="display:none;">
-            <div class="card">
-                <h2>वर्कर रजिस्ट्रेशन</h2>
-                <form id="register-form">
-                    <div class="input-group">
-                        <label>पूरा नाम</label>
-                        <input type="text" id="reg-name" placeholder="अपना नाम लिखें" required>
-                    </div>
-                    <div class="input-group">
-                        <label>मोबाइल नंबर</label>
-                        <input type="tel" id="reg-phone" placeholder="10 अंकों का नंबर" pattern="[0-9]{10}" required>
-                    </div>
-                    <div class="input-group">
-                        <label>पिनकोड</label>
-                        <input type="text" id="reg-pincode" placeholder="6 अंकों का पिनकोड" pattern="[0-9]{6}" required>
-                    </div>
-                    <div class="input-group">
-                        <label>कैटेगरी</label>
-                        <select id="reg-category" onchange="updateSubcategories('reg-category', 'reg-subcategory')" required>
-                            <option value="">कैटेगरी चुनें</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>सब-कैटेगरी</label>
-                        <select id="reg-subcategory" required>
-                            <option value="">पहले कैटेगरी चुनें</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary" id="reg-submit">रजिस्टर करें</button>
-                </form>
+            <div class="input-group">
+                <label>गाँव चुनें</label>
+                <select id="search-village"><option value="All">सभी गाँव</option></select>
             </div>
-        </section>
+            <div class="input-group">
+                <label>काम की कैटेगरी</label>
+                <select id="search-category"><option value="All">सभी काम</option></select>
+            </div>
+            <button onclick="searchWorkers()" class="btn-search">🔍 सर्च करें</button>
+        </div>
 
-        <!-- Search Tab -->
-        <section id="search-section" class="tab-content">
-            <div class="search-box">
+        <div id="map-container"><div id="map"></div></div>
+        
+        <div id="results-list"></div>
+    </section>
+
+    <section id="register-section" class="tab-content" style="display:none;">
+        <div class="card">
+            <h2>नया रजिस्ट्रेशन</h2>
+            <form id="register-form">
+                <div class="input-group"><label>आपका नाम</label><input type="text" id="reg-name" required></div>
+                <div class="input-group"><label>मोबाइल नंबर</label><input type="tel" id="reg-phone" pattern="[0-9]{10}" required></div>
+                <div class="input-group"><label>पिनकोड</label><input type="text" id="reg-pincode" onblur="fetchVillages('reg')" required></div>
                 <div class="input-group">
-                    <input type="text" id="search-pincode" placeholder="पिनकोड लिखें (उदा: 302001)">
+                    <label>अपना गाँव चुनें</label>
+                    <select id="reg-village" required><option value="">पहले पिनकोड डालें</option></select>
                 </div>
                 <div class="input-group">
-                    <select id="search-category">
-                        <option value="All">सभी कैटेगरीज</option>
-                    </select>
+                    <label>कैटेगरी</label>
+                    <select id="reg-category" onchange="updateSub('reg-category', 'reg-sub')"></select>
                 </div>
-                <button onclick="searchWorkers()" class="btn-search">सर्च करें</button>
-            </div>
+                <div class="input-group">
+                    <label>सब-कैटेगरी</label>
+                    <select id="reg-sub"><option>कैटेगरी चुनें</option></select>
+                </div>
+                <button type="submit" class="btn-primary" id="reg-submit">रजिस्टर करें</button>
+            </form>
+        </div>
+    </section>
 
-            <div id="results-count" class="results-info"></div>
-            <div id="results-list" class="results-grid">
-                <p class="placeholder-text">सर्च करने के लिए ऊपर पिनकोड और कैटेगरी चुनें।</p>
-            </div>
-        </section>
+    <footer class="footer">
+        <p>© 2026 ग्राम शक्ति पोर्टल | Digital Village</p>
+    </footer>
+</div>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <p>&copy; 2024 Gram Shakti Project. ग्राम शक्ति पोर्टल।</p>
-        </footer>
-    </div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
-    <!-- Firebase SDKs (Compat version for Blogger/Static support) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+<script>
+    // 1. Firebase (Apna original config use karein)
+    const firebaseConfig = { projectId: "gen-lang-client-0577414319" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    <!-- ब्लॉगर में इस्तेमाल के लिए app.js का कोड यहाँ <script> टैग के अंदर डालें -->
-    <script src="app.js"></script>
+    const CATS = {
+        "खेती बाड़ी": ["ट्रैक्टर", "JCB", "बोरवेल", "ड्रोन स्प्रे", "बीज भंडार"],
+        "मिस्त्री/Skilled": ["इलेक्ट्रीशियन", "प्लंबर", "मिस्त्री", "पेंटर", "बढ़ई"],
+        "गाँव की सेवा": ["डेयरी", "ई-मित्र", "किराना", "टेंट हाउस", "डीजे"]
+    };
+
+    let map;
+
+    window.onload = () => {
+        const rc = document.getElementById('reg-category'), sc = document.getElementById('search-category');
+        Object.keys(CATS).forEach(c => {
+            rc.add(new Option(c, c));
+            sc.add(new Option(c, c));
+        });
+        initMap();
+    };
+
+    function initMap() {
+        // Map ko reset karke load karein
+        if(map) map.remove();
+        map = L.map('map').setView([26.9124, 75.7873], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        // Map tiles ko refresh karne ke liye timeout
+        setTimeout(() => { map.invalidateSize(); }, 400);
+    }
+
+    function showTab(t) {
+        document.getElementById('search-section').style.display = t==='search'?'block':'none';
+        document.getElementById('register-section').style.display = t==='register'?'block':'none';
+        document.getElementById('tab-search').className = t==='search'?'active':'';
+        document.getElementById('tab-register').className = t==='register'?'active':'';
+        if(t === 'search') setTimeout(() => { map.invalidateSize(); }, 200);
+    }
+
+    function updateSub(cid, sid) {
+        const c = document.getElementById(cid).value, s = document.getElementById(sid);
+        s.innerHTML = '';
+        if(CATS[c]) CATS[c].forEach(v => s.add(new Option(v, v)));
+    }
+
+    async function fetchVillages(type) {
+        const p = document.getElementById(type==='reg'?'reg-pincode':'search-pincode').value;
+        const sel = document.getElementById(type==='reg'?'reg-village':'search-village');
+        if(p.length === 6) {
+            sel.innerHTML = '<option>खोज रहे हैं...</option>';
+            const res = await fetch(`https://api.postalpincode.in/pincode/${p}`);
+            const d = await res.json();
+            if(d[0].Status === "Success") {
+                sel.innerHTML = type==='reg'?'<option value="">गाँव चुनें</option>':'<option value="All">सभी गाँव</option>';
+                d[0].PostOffice.forEach(po => sel.add(new Option(po.Name, po.Name)));
+            }
+        }
+    }
+
+    async function searchWorkers() {
+        const p = document.getElementById('search-pincode').value;
+        const v = document.getElementById('search-village').value;
+        const list = document.getElementById('results-list');
+        list.innerHTML = "खोज रहे हैं...";
+        
+        let q = db.collection('listings').where('pincode', '==', p);
+        if(v !== 'All') q = q.where('village', '==', v);
+
+        const snap = await q.get();
+        list.innerHTML = snap.empty ? "<p style='text-align:center; padding:20px;'>कोई वर्कर नहीं मिला।</p>" : "";
+        
+        snap.forEach(doc => {
+            const w = doc.data();
+            list.innerHTML += `<div class="worker-card">
+                <div class="worker-info"><h3>${w.name}</h3><p>${w.subcategory} | 📍 ${w.village}</p></div>
+                <a href="tel:${w.phone}" class="call-btn">📞 कॉल</a>
+            </div>`;
+        });
+        // Map ko search ke baad refresh karein
+        map.invalidateSize();
+    }
+</script>
 </body>
 </html>

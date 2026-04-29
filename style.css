@@ -14,12 +14,13 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
     background-color: #f0f2f5;
     color: var(--text-dark);
+    line-height: 1.6;
 }
 
 #app {
@@ -29,13 +30,14 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
 }
 
+/* Header */
 .header {
     background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white;
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
     text-align: center;
 }
 
@@ -43,18 +45,21 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
+    margin-bottom: 5px;
 }
 
-.logo h1 { font-size: 1.5rem; }
+.logo h1 { font-size: 1.6rem; letter-spacing: 1px; }
+.tagline { font-size: 0.85rem; opacity: 0.9; }
 
+/* Tabs */
 .main-tabs {
     display: flex;
     background: var(--white);
-    border-bottom: 1px solid #eee;
+    border-bottom: 2px solid #eee;
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 1000;
 }
 
 .main-tabs button {
@@ -62,47 +67,164 @@ body {
     padding: 1rem;
     border: none;
     background: none;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-light);
+    cursor: pointer;
+    transition: 0.3s;
     border-bottom: 3px solid transparent;
 }
 
 .main-tabs button.active {
     color: var(--primary);
     border-bottom-color: var(--primary);
+    background-color: var(--bg-faded);
 }
 
-.tab-content { padding: 1rem; flex-grow: 1; }
+/* Forms & Inputs */
+.tab-content { padding: 1.2rem; flex-grow: 1; }
 
-.input-group { margin-bottom: 1rem; }
-.input-group label { display: block; font-size: 0.8rem; margin-bottom: 5px; color: #555; font-weight: 600; }
-.input-group input, .input-group select {
+.card {
+    background: var(--white);
+    padding: 5px;
+}
+
+.card h2 { margin-bottom: 1rem; font-size: 1.2rem; color: var(--primary); }
+
+.input-group { margin-bottom: 1.2rem; }
+.input-group label { 
+    display: block; 
+    font-size: 0.85rem; 
+    margin-bottom: 6px; 
+    color: var(--text-dark); 
+    font-weight: 600; 
+}
+
+.input-group input, 
+.input-group select {
     width: 100%;
-    padding: 12px;
-    border: 1.5px solid #ddd;
-    border-radius: 8px;
+    padding: 12px 15px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: var(--radius);
     font-size: 1rem;
+    background: #fdfdfd;
+    transition: 0.2s;
 }
 
+.input-group input:focus, 
+.input-group select:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+/* Buttons */
 .btn-primary {
-    width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;
+    width: 100%; 
+    padding: 15px; 
+    background: var(--primary); 
+    color: white; 
+    border: none; 
+    border-radius: var(--radius); 
+    font-weight: 700; 
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
 }
 
 .btn-search {
-    width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; margin-top: 5px;
+    width: 100%; 
+    padding: 15px; 
+    background: var(--accent); 
+    color: white; 
+    border: none; 
+    border-radius: var(--radius); 
+    font-weight: 700; 
+    font-size: 1rem;
+    margin-top: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(255, 152, 0, 0.2);
 }
+
+/* Map Styling */
+#map-container {
+    width: 100%;
+    height: 250px;
+    margin: 15px 0;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid #ddd;
+    display: none; /* JS इसे सर्च होने पर दिखाएगा */
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+/* Worker Cards */
+.results-grid { margin-top: 1.5rem; }
 
 .worker-card {
-    background: white; border: 1px solid #eee; border-radius: 12px; padding: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow);
+    background: white; 
+    border: 1px solid #f0f0f0; 
+    border-radius: var(--radius); 
+    padding: 15px; 
+    margin-bottom: 15px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
 }
 
-.worker-info h3 { font-size: 1rem; color: #333; }
-.worker-info p { font-size: 0.8rem; color: #777; }
+.worker-card:active { transform: scale(0.98); }
+
+.worker-info h3 { font-size: 1.1rem; color: #222; margin-bottom: 4px; }
+.worker-info p { font-size: 0.85rem; color: var(--text-light); }
 
 .call-btn {
-    background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;
+    background: #25d366; 
+    color: white; 
+    text-decoration: none; 
+    padding: 10px 20px; 
+    border-radius: 50px; 
+    font-size: 0.9rem; 
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-.results-info { padding: 10px 0; font-weight: 700; color: var(--primary); }
-.placeholder-text { text-align: center; color: #aaa; margin-top: 50px; }
-.footer { padding: 20px; text-align: center; font-size: 0.75rem; color: #999; }
+/* Status Messages */
+.results-info { 
+    padding: 10px 5px; 
+    font-weight: 700; 
+    color: var(--primary); 
+    border-left: 4px solid var(--primary);
+    margin: 10px 0;
+    background: var(--bg-faded);
+}
+
+.placeholder-text { 
+    text-align: center; 
+    color: #bbb; 
+    padding: 40px 20px;
+    font-style: italic;
+}
+
+.footer { 
+    padding: 25px; 
+    text-align: center; 
+    font-size: 0.8rem; 
+    color: #aaa; 
+    background: #fafafa;
+    border-top: 1px solid #eee;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tab-content { animation: fadeIn 0.4s ease-out; }

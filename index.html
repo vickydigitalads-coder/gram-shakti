@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gram Shakti - ग्राम शक्ति</title>
+    <!-- ब्लॉगर में इस्तेमाल के लिए style.css का कोड यहाँ <style> टैग के अंदर डालें -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="icon">🌾</span>
+                <h1>Gram Shakti</h1>
+            </div>
+            <p class="tagline">गाँव की शक्ति, गाँव का विकास</p>
+        </header>
+
+        <!-- Main Navigation -->
+        <nav class="main-tabs">
+            <button onclick="showTab('search')" id="tab-search" class="active">काम ढूँढें</button>
+            <button onclick="showTab('register')" id="tab-register">रजिस्ट्रेशन</button>
+        </nav>
+
+        <!-- Registration Tab -->
+        <section id="register-section" class="tab-content" style="display:none;">
+            <div class="card">
+                <h2>वर्कर रजिस्ट्रेशन</h2>
+                <form id="register-form">
+                    <div class="input-group">
+                        <label>पूरा नाम</label>
+                        <input type="text" id="reg-name" placeholder="अपना नाम लिखें" required>
+                    </div>
+                    <div class="input-group">
+                        <label>मोबाइल नंबर</label>
+                        <input type="tel" id="reg-phone" placeholder="10 अंकों का नंबर" pattern="[0-9]{10}" required>
+                    </div>
+                    <div class="input-group">
+                        <label>पिनकोड</label>
+                        <input type="text" id="reg-pincode" placeholder="6 अंकों का पिनकोड" pattern="[0-9]{6}" required>
+                    </div>
+                    <div class="input-group">
+                        <label>कैटेगरी</label>
+                        <select id="reg-category" onchange="updateSubcategories('reg-category', 'reg-subcategory')" required>
+                            <option value="">कैटेगरी चुनें</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>सब-कैटेगरी</label>
+                        <select id="reg-subcategory" required>
+                            <option value="">पहले कैटेगरी चुनें</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary" id="reg-submit">रजिस्टर करें</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Search Tab -->
+        <section id="search-section" class="tab-content">
+            <div class="search-box">
+                <div class="input-group">
+                    <input type="text" id="search-pincode" placeholder="पिनकोड लिखें (उदा: 302001)">
+                </div>
+                <div class="input-group">
+                    <select id="search-category">
+                        <option value="All">सभी कैटेगरीज</option>
+                    </select>
+                </div>
+                <button onclick="searchWorkers()" class="btn-search">सर्च करें</button>
+            </div>
+
+            <div id="results-count" class="results-info"></div>
+            <div id="results-list" class="results-grid">
+                <p class="placeholder-text">सर्च करने के लिए ऊपर पिनकोड और कैटेगरी चुनें।</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Gram Shakti Project. ग्राम शक्ति पोर्टल।</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDKs (Compat version for Blogger/Static support) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+
+    <!-- ब्लॉगर में इस्तेमाल के लिए app.js का कोड यहाँ <script> टैग के अंदर डालें -->
+    <script src="app.js"></script>
+</body>
+</html>

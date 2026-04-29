@@ -22,7 +22,7 @@
         </header>
 
         <nav class="main-tabs">
-            <button onclick="showTab('search')" id="tab-search" class="active">काम ढूँढें</button>
+            <button onclick="showTab('search')" id="tab-search" class="active">Search Worker/वर्कर ढूँढें</button>
             <button onclick="showTab('register')" id="tab-register">रजिस्ट्रेशन</button>
         </nav>
 

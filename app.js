@@ -1,74 +1,108 @@
-// Firebase Configuration (Aapka API Key pehle se add hai)
+// Firebase Config
 const firebaseConfig = {
     apiKey: 'AIzaSyAVW9aVzLWsGcmJUxgo5sb34Ljf9IkZ5iM',
     projectId: 'gen-lang-client-0577414319',
     authDomain: "gen-lang-client-0577414319.firebaseapp.com",
-    storageBucket: "gen-lang-client-0577414319.appspot.com",
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// --- 16 Categories & Sub-Categories ---
+// --- 22 Categories & Sub-Categories (Complete Version) ---
 const CATEGORIES_DATA = {
-    "Repair & Service": ["Electrician (बिजली मिस्त्री)", "Plumber (प्लम्बर)", "Carpenter (बढ़ई)", "AC & Fridge Repair", "RO/Water Purifier", "Mechanic (गाड़ी मिस्त्री)"],
-    "Property & Rentals": ["House for Rent", "Shop for Rent (दुकान)", "Agricultural Land (खेती की जमीन)", "Property Dealer"],
-    "Agriculture (खेती)": ["Seed & Fertilizer (बीज-खाद)", "Tractor & Implements", "Dairy & Livestock (पशुपालन)", "Farm Labor (मजदूर)"],
-    "Education & Skills": ["Home Tutors", "Coaching Centers", "Computer Training", "Skills Training"],
-    "Daily Services": ["Laundry (धोबी)", "Barber (नाई)", "Tailor (दर्जी)", "Cleaning (सफाई)"],
-    "Mandli & Labor": ["Construction Labor", "Painting (पुताई)", "Loading/Unloading", "Event Organizers"],
-    "Shopkeepers": ["Grocery (किराना)", "Hardware Store", "Mobile Shop", "Garment Shop"],
-    "Drivers & Vehicles": ["Truck Drivers", "Auto/Taxi Drivers", "Delivery Boys", "Rental Services"],
-    "Medical & Health": ["Clinic / Doctor", "Medical Store", "Nursing Service", "Path Lab"],
-    "Finance & Banking": ["Bank Mitra", "Insurances", "Loan Assistance"],
-    "Govt Services": ["E-Mitra / CSC", "Legal Help", "Documentation"],
-    "Livestock (पशुपालन)": ["Vet Doctor", "Animal Feed Store", "Poultry Farming"],
-    "Catering": ["Cook / हलवाई", "Tiffin Service", "Restaurant/Dhaba"],
-    "Digital & Tech": ["Graphics Designer", "SEO Expert", "Digital Marketing"],
-    "Security": ["Security Guard", "CCTV Installation"],
-    "Beauty & Spa": ["Beauty Parlour", "Mehndi Artist", "Barber Shop"]
+    "1. सरकारी एवं प्रशासन": ["मंत्री", "जिला कलेक्टर / एसपी", "तहसीलदार / एसडीएम", "सरपंच", "ग्राम सेवक / सचिव", "पटवारी", "बीट कांस्टेबल / पुलिस", "वार्ड पंच", "पोस्ट मास्टर / डाकघर"],
+    "2. खेती और भारी मशीनरी": ["ट्रैक्टर सेवा", "थ्रेशर", "कंबाइन हार्वेस्टर", "JCB / लोडर / क्रेन", "बोरवेल मशीन", "रोटावेटर / कल्टीवेटर", "स्प्रे पंप (ड्रोन सहित)", "रीपर / कटर / मिस्त्री"],
+    "3. पशुपालन और डेयरी": ["पशु डॉक्टर", "AI वर्कर", "डेयरी / दूध / घी / पनीर", "पशु आहार", "चारा काटने वाले"],
+    "4. मिस्त्री और कुशल कारीगर": ["इलेक्ट्रीशियन", "प्लंबर", "राज-मिस्त्री", "बढ़ई", "वेल्डर / लोहार", "पेंटर", "टाइल्स / मार्बल मिस्त्री"],
+    "5. निर्माण सेवाएँ": ["आर्किटेक्ट", "कॉन्ट्रैक्टर", "रेत / बजरी / ईंट सप्लायर", "सीमेंट / सरिया सप्लायर"],
+    "6. गाँव का बाज़ार": ["किराना", "मिठाई / नाश्ता", "सब्जी / फल", "कपड़ा / जूते", "खाद-बीज", "बर्तन", "श्रृंगार", "आटा चक्की"],
+    "7. खाना और ठहरना": ["ढाबा / रेस्टोरेंट", "होटल / लॉज", "चाय स्टॉल"],
+    "8. परिवहन": ["पिकअप / लोडर", "ट्रक / ट्रॉली", "ऑटो / ई-रिक्शा", "बाइक मैकेनिक", "पंचर दुकान"],
+    "9. रिपेयर सेवाएँ": ["TV / फ्रिज / AC रिपेयर", "मोटर / पंखा रिपेयर", "इन्वर्टर / बैटरी"],
+    "10. रोज़ाना सेवाएँ": ["नाई", "दर्जी", "मोची", "ताला-चाबी", "धार लगाने वाले", "धोबी"],
+    "11. आयोजन": ["टेंट", "हलवाई", "डीजे", "फोटोग्राफर", "पंडित / मौलवी", "पानी सप्लाई"],
+    "12. स्वास्थ्य और शिक्षा": ["डॉक्टर", "मेडिकल", "एम्बुलेंस", "स्कूल", "कोचिंग", "आंगनवाड़ी"],
+    "13. डिजिटल सेवाएँ": ["ई-मित्र", "मोबाइल रिपेयर", "कंप्यूटर", "CCTV / सोलर"],
+    "14. बैंकिंग और फाइनेंस": ["बैंक", "बीमा", "लोन", "मनी ट्रांसफर"],
+    "15. सरकारी योजनाएँ": ["पेंशन सहायता", "राशन कार्ड", "आयुष्मान कार्ड", "किसान योजना"],
+    "16. बिजली, पानी": ["बिजली विभाग", "जल विभाग", "गैस एजेंसी", "फायर ब्रिगेड"],
+    "17. प्रॉपर्टी": ["जमीन खरीद-बिक्री", "किराया", "दुकान / गोदाम"],
+    "18. महिला सेवाएँ": ["ब्यूटी पार्लर", "मेहंदी", "सिलाई सेंटर"],
+    "19. कानूनी और सुरक्षा": ["वकील", "नोटरी", "जमीन सलाह"],
+    "20. सफाई और मजदूरी": ["मजदूर", "सफाई कर्मचारी", "घरेलू काम"],
+    "21. मनोरंजन": ["जिम", "गेमिंग", "पार्क"],
+    "22. अन्य सेवाएँ": ["कबाड़ी", "पुराना सामान खरीद-बिक्री"]
 };
 
-// --- ऐप लोड होने पर चालू होने वाला फंक्शन ---
+let map, markers = [], userLocation = { lat: 26.9124, lng: 75.7873 };
+
 document.addEventListener('DOMContentLoaded', () => {
-    populateCategorySelectors();
+    populateCategories();
+    initMap();
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(p => {
+            userLocation = { lat: p.coords.latitude, lng: p.coords.longitude };
+            map.setView([userLocation.lat, userLocation.lng], 13);
+        });
+    }
 });
 
-function populateCategorySelectors() {
-    const regCat = document.getElementById('reg-category');
-    const searchCat = document.getElementById('search-category');
-    Object.keys(CATEGORIES_DATA).forEach(cat => {
-        regCat.add(new Option(cat, cat));
-        searchCat.add(new Option(cat, cat));
+function initMap() {
+    map = L.map('map').setView([userLocation.lat, userLocation.lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+}
+
+function populateCategories() {
+    const reg = document.getElementById('reg-category'), src = document.getElementById('search-category');
+    reg.innerHTML = '<option value="">कैटेगरी चुनें</option>';
+    Object.keys(CATEGORIES_DATA).forEach(c => {
+        reg.add(new Option(c, c));
+        src.add(new Option(c, c));
     });
 }
 
-function updateSubcategories(catId, subCatId) {
-    const cat = document.getElementById(catId).value;
-    const subCat = document.getElementById(subCatId);
-    subCat.innerHTML = '<option value="">चुने...</option>';
+function updateSubcategories(srcId, targetId) {
+    const cat = document.getElementById(srcId).value;
+    const sub = document.getElementById(targetId);
+    sub.innerHTML = '<option value="">सब-कैटेगरी चुनें</option>';
     if (cat && CATEGORIES_DATA[cat]) {
-        CATEGORIES_DATA[cat].forEach(sub => {
-            subCat.add(new Option(sub, sub));
-        });
+        CATEGORIES_DATA[cat].forEach(s => sub.add(new Option(s, s)));
     }
 }
 
-function showTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-    document.querySelectorAll('.main-tabs button').forEach(b => b.classList.remove('active'));
-    document.getElementById(`${tabName}-section`).style.display = 'block';
-    document.getElementById(`tab-${tabName}`).classList.add('active');
+// --- पिनकोड से गांव सर्च करने का फंक्शन ---
+async function fetchVillages() {
+    const pin = document.getElementById('reg-pincode').value;
+    if (pin.length === 6) {
+        try {
+            const response = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+            const data = await response.json();
+            if (data[0].Status === "Success") {
+                const villages = data[0].PostOffice.map(po => po.Name);
+                alert("इस पिनकोड के गांव मिल गए हैं: \n" + villages.join(", "));
+                // आप चाहें तो गांवों का ड्रॉपडाउन भी यहाँ भर सकते हैं
+            } else {
+                alert("गलत पिनकोड!");
+            }
+        } catch (err) { console.log("API Error"); }
+    }
 }
 
-// --- वर्कर रजिस्ट्रेशन (Save Data) ---
+// HTML के reg-pincode इनपुट में onblur="fetchVillages()" जोड़ें
+
+function showTab(t) {
+    document.querySelectorAll('.tab-content').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.main-tabs button').forEach(b => b.classList.remove('active'));
+    document.getElementById(t + '-section').style.display = 'block';
+    document.getElementById('tab-' + t).classList.add('active');
+    if(t === 'search') setTimeout(() => map.invalidateSize(), 200);
+}
+
 document.getElementById('register-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const submitBtn = document.getElementById('reg-submit');
-    submitBtn.disabled = true;
-    submitBtn.innerText = 'रजिस्टर हो रहा है...';
-
+    const btn = document.getElementById('reg-submit');
+    btn.disabled = true; btn.innerText = 'रजिस्टर हो रहा है...';
+    
     const data = {
         name: document.getElementById('reg-name').value,
         phone: document.getElementById('reg-phone').value,
@@ -76,61 +110,58 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
         category: document.getElementById('reg-category').value,
         subcategory: document.getElementById('reg-subcategory').value,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        location: { lat: 0, lng: 0 } // Location Map Object
+        location: userLocation
     };
 
     try {
         await db.collection('listings').add(data);
-        alert('सफल! आपका रजिस्ट्रेशन हो गया है।');
+        alert('बधाई हो! ग्राम शक्ति पर आपका रजिस्ट्रेशन हो गया है।');
         document.getElementById('register-form').reset();
         showTab('search');
-    } catch (err) {
-        console.error(err);
-        alert('त्रुटि! डेटा सेव नहीं हुआ।');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = 'रजिस्टर करें';
-    }
+    } catch(e) { alert('डेटा सेव नहीं हुआ!'); }
+    btn.disabled = false; btn.innerText = 'रजिस्टर करें';
 });
 
-// --- सर्च फंक्शन ---
 async function searchWorkers() {
-    const pincode = document.getElementById('search-pincode').value;
-    const category = document.getElementById('search-category').value;
-    const resultsList = document.getElementById('results-list');
-    const resultsCount = document.getElementById('results-count');
-
-    if (!pincode) { alert('कृपया पिनकोड डालें!'); return; }
-
-    resultsList.innerHTML = '<p class="placeholder-text">सर्च कर रहे हैं...</p>';
+    const pin = document.getElementById('search-pincode').value, cat = document.getElementById('search-category').value;
+    const list = document.getElementById('results-list'), count = document.getElementById('results-count');
+    if(!pin) { alert('पिनकोड डालें!'); return; }
     
+    list.innerHTML = 'खोज रहे हैं...';
+    markers.forEach(m => map.removeLayer(m)); markers = [];
+
     try {
-        let query = db.collection('listings').where('pincode', '==', pincode);
-        if (category !== 'All') { query = query.where('category', '==', category); }
-
-        const snapshot = await query.get();
-        if (snapshot.empty) {
-            resultsList.innerHTML = '<p class="placeholder-text">कोई वर्कर नहीं मिला।</p>';
-            resultsCount.innerText = '';
-            return;
+        let q = db.collection('listings').where('pincode', '==', pin);
+        if(cat !== 'All' && cat !== '') q = q.where('category', '==', cat);
+        const snp = await q.get();
+        
+        if(snp.empty) { 
+            list.innerHTML = 'इस पिनकोड पर कोई वर्कर नहीं मिला।'; 
+            count.innerText = '0 परिणाम';
+            document.getElementById('map-container').style.display='none'; 
+            return; 
         }
-
-        resultsCount.innerText = `${snapshot.size} वर्कर मिले`;
-        resultsList.innerHTML = '';
-        snapshot.forEach(doc => {
-            const worker = doc.data();
-            resultsList.innerHTML += `
+        
+        document.getElementById('map-container').style.display='block';
+        setTimeout(() => map.invalidateSize(), 200);
+        count.innerText = snp.size + ' वर्कर मिले'; list.innerHTML = '';
+        
+        snp.forEach(d => {
+            const w = d.data();
+            if(w.location) {
+                let m = L.marker([w.location.lat, w.location.lng]).addTo(map).bindPopup(`<b>${w.name}</b><br>${w.subcategory}`);
+                markers.push(m);
+            }
+            list.innerHTML += `
                 <div class="worker-card">
                     <div class="worker-info">
-                        <h3>${worker.name}</h3>
-                        <p>📍 ${worker.pincode} • ${worker.subcategory}</p>
+                        <h3>${w.name}</h3>
+                        <p>🔹 ${w.subcategory}</p>
+                        <p>📍 पिनकोड: ${w.pincode}</p>
                     </div>
-                    <a href="tel:${worker.phone}" class="call-btn">📞 कॉल</a>
-                </div>
-            `;
+                    <a href="tel:${w.phone}" class="call-btn">📞 कॉल</a>
+                </div>`;
         });
-    } catch (err) {
-        resultsList.innerHTML = '<p class="placeholder-text">डेटा नहीं मिल सका।</p>';
-    }
+        if(markers.length) map.fitBounds(L.featureGroup(markers).getBounds());
+    } catch(e) { list.innerHTML = 'डेटा लोड करने में त्रुटि आई।'; }
 }

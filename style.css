@@ -1,100 +1,253 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gram Shakti - ग्राम शक्ति</title>
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="app">
-        <header class="header">
-            <div class="logo">
-                <span class="icon">🌾</span>
-                <h1>Gram Shakti</h1>
-            </div>
-            <p class="tagline">गाँव की शक्ति, गाँव का विकास</p>
-        </header>
+/* --- ग्राम शक्ति: प्रोफेशनल ऐप स्टाइल --- */
 
-        <nav class="main-tabs">
-            <button onclick="showTab('search')" id="tab-search" class="active">Search Worker/वर्कर ढूँढें</button>
-            <button onclick="showTab('register')" id="tab-register">Workerरजिस्ट्रेशन</button>
-        </nav>
+:root {
+    --primary: #1b5e20;        /* गहरा हरा - हरियाली और विश्वास */
+    --primary-light: #4caf50;  /* हल्का हरा */
+    --accent: #ff9800;         /* ऑरेंज - ऊर्जा और ध्यान */
+    --accent-dark: #e68a00;
+    --bg-color: #f4f7f6;       /* बैकग्राउंड ग्रे-वाइट */
+    --white: #ffffff;
+    --text-dark: #2c3e50;
+    --text-light: #718096;
+    --radius: 16px;            /* गोलाई */
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
 
-        <section id="register-section" class="tab-content" style="display:none;">
-            <div class="card">
-                <h2>वर्कर रजिस्ट्रेशन</h2>
-                <form id="register-form">
-                    <div class="input-group">
-                        <label>पूरा नाम</label>
-                        <input type="text" id="reg-name" placeholder="अपना नाम लिखें" required>
-                    </div>
-                    <div class="input-group">
-                        <label>मोबाइल नंबर</label>
-                        <input type="tel" id="reg-phone" placeholder="10 अंकों का नंबर" pattern="[0-9]{10}" required>
-                    </div>
-                    <div class="input-group">
-                        <label>पिनकोड (डालते ही गांव की लिस्ट आएगी)</label>
-                        <input type="text" id="reg-pincode" placeholder="6 अंकों का पिनकोड" pattern="[0-9]{6}" onblur="fetchVillages()" required>
-                    </div>
-                    <div class="input-group">
-                        <label>कैटेगरी</label>
-                        <select id="reg-category" onchange="updateSubcategories('reg-category', 'reg-subcategory')" required>
-                            <option value="">कैटेगरी चुनें</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>सब-कैटेगरी</label>
-                        <select id="reg-subcategory" required>
-                            <option value="">पहले कैटेगरी चुनें</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary" id="reg-submit">रजिस्टर करें</button>
-                </form>
-            </div>
-        </section>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Hind', 'Segoe UI', sans-serif; /* साफ़ हिंदी अक्षरों के लिए */
+}
 
-        <section id="search-section" class="tab-content">
-            <div class="search-box">
-                <div class="input-group">
-                    <label>पिनकोड से खोजें</label>
-                    <input type="text" id="search-pincode" placeholder="उदा: 302001">
-                </div>
-                <div class="input-group">
-                    <label>काम की कैटेगरी</label>
-                    <select id="search-category">
-                        <option value="All">सभी कैटेगरीज</option>
-                    </select>
-                </div>
-                <button onclick="searchWorkers()" class="btn-search">🔍 सर्च करें</button>
-            </div>
+body {
+    background-color: #ddd; /* स्क्रीन के बाहर का हिस्सा */
+    color: var(--text-dark);
+    display: flex;
+    justify-content: center;
+}
 
-            <div id="map-container">
-                <div id="map"></div>
-            </div>
+#app {
+    max-width: 480px; /* मोबाइल साइज */
+    width: 100%;
+    background: var(--bg-color);
+    min-height: 100vh;
+    box-shadow: 0 0 40px rgba(0,0,0,0.2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
 
-            <div id="results-count" class="results-info"></div>
-            
-            <div id="results-list" class="results-grid">
-                <p class="placeholder-text">सर्च करने के लिए ऊपर पिनकोड और कैटेगरी चुनें।</p>
-            </div>
-        </section>
+/* --- प्रीमियम हेडर --- */
+.header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    padding: 40px 20px 50px;
+    text-align: center;
+    border-radius: 0 0 40px 40px; /* नीचे से गोलाई */
+    box-shadow: var(--shadow);
+}
 
-        <footer class="footer">
-            <p>&copy; 2026 Gram Shakti Project. हर गाँव की हर ज़रूरत - एक जगह।</p>
-        </footer>
-    </div>
+.logo h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    
-    <script src="app.js"></script>
-</body>
-</html>
+.tagline {
+    font-size: 1rem;
+    margin-top: 8px;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+/* --- फ्लोटिंग नेविगेशन टैब्स --- */
+.main-tabs {
+    display: flex;
+    margin: -30px 25px 20px; /* हेडर के ऊपर तैरता हुआ */
+    background: var(--white);
+    padding: 8px;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    z-index: 10;
+}
+
+.main-tabs button {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    background: none;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-light);
+    cursor: pointer;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.main-tabs button.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3);
+}
+
+/* --- कंटेंट और कार्ड्स --- */
+.tab-content {
+    padding: 10px 20px 100px;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    background: var(--white);
+    padding: 25px;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    margin-bottom: 20px;
+}
+
+.card h2 {
+    color: var(--primary);
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    border-left: 5px solid var(--accent);
+    padding-left: 12px;
+}
+
+/* --- इनपुट फील्ड्स --- */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+}
+
+.input-group input, 
+.input-group select {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #edf2f7;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: #f8fafc;
+    transition: all 0.3s;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
+}
+
+/* --- स्टाइलिश बटन्स --- */
+.btn-primary {
+    background: linear-gradient(to right, var(--primary), var(--primary-light));
+    color: white;
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(27, 94, 32, 0.3);
+    transition: 0.3s;
+}
+
+.btn-search {
+    background: linear-gradient(to right, var(--accent), var(--accent-dark));
+    color: white;
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(255, 152, 0, 0.3);
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+/* --- मैप डिजाइन --- */
+#map-container {
+    margin: 20px 0;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 5px solid white;
+    box-shadow: var(--shadow);
+    height: 260px;
+}
+
+/* --- वर्कर रिजल्ट कार्ड --- */
+.worker-card {
+    background: var(--white);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    border-bottom: 4px solid #f0f0f0;
+    transition: 0.3s;
+}
+
+.worker-card:hover {
+    border-bottom-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.worker-info h3 {
+    font-size: 1.25rem;
+    color: var(--primary);
+    margin-bottom: 4px;
+}
+
+.worker-info p {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+/* --- कॉल बटन (WhatsApp Green) --- */
+.call-btn {
+    background: #25D366;
+    color: white;
+    padding: 12px 22px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+/* --- फुटर --- */
+.footer {
+    padding: 30px;
+    text-align: center;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    background: #f8fafc;
+    border-top: 1px solid #eee;
+}

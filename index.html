@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* यहाँ आपका वही प्रीमियम CSS रहेगा जो मैंने पहले दिया था */
         :root { --primary: #1b5e20; --primary-light: #4caf50; --accent: #ff9800; --white: #ffffff; --shadow: 0 10px 25px rgba(0,0,0,0.1); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Hind', sans-serif; }
         body { background-color: #f0f2f5; display: flex; justify-content: center; }
@@ -57,7 +56,13 @@
             </div>
             <div class="input-group">
                 <label>कैटेगरी चुनें</label>
-                <select id="search-category"><option value="All">सभी कैटेगरीज</option></select>
+                <select id="search-category" onchange="updateSub('search-category', 'search-sub')">
+                    <option value="All">सभी कैटेगरीज</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>सब-कैटेगरी चुनें</label>
+                <select id="search-sub"><option value="All">सभी काम</option></select>
             </div>
             <button onclick="searchWorkers()" class="btn-search">🔍 सर्च करें</button>
         </div>
@@ -93,12 +98,10 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
 <script>
-    // --- यहाँ है असली "प्लस" किया हुआ कोड ---
-    const firebaseConfig = { projectId: "gen-lang-client-0577414319" }; // अपना config यहाँ रहने दें
+    const firebaseConfig = { projectId: "gen-lang-client-0577414319" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // पूरी 22 कैटेगरीज की लिस्ट
     const CATS = {
         "1. सरकारी एवं प्रशासन": ["सरपंच", "पटवारी", "सचिव", "पुलिस", "पोस्ट मास्टर"],
         "2. खेती और भारी मशीनरी": ["ट्रैक्टर", "थ्रेशर", "JCB", "बोरवेल", "ड्रोन स्प्रे"],
@@ -116,7 +119,7 @@
         "14. बैंकिंग और फाइनेंस": ["बैंक", "बीमा", "लोन", "मनी ट्रांसफर"],
         "15. सरकारी योजनाएँ": ["पेंशन", "राशन कार्ड", "आयुष्मान कार्ड"],
         "16. बिजली और पानी": ["बिजली विभाग", "जल विभाग", "गैस एजेंसी"],
-        "17. प्रॉपर्टी": ["जमीन खरीद-बिक्री", "किराया", "गोदाम"],
+        "17. प्रॉपर्टी": ["जमीन खरीद-बबीक्री", "किराया", "गोदाम"],
         "18. महिला सेवाएँ": ["ब्यूटी पार्लर", "मेहंदी", "सिलाई सेंटर"],
         "19. कानूनी और सुरक्षा": ["वकील", "नोटरी", "जमीन सलाह"],
         "20. सफाई और मजदूरी": ["मजदूर", "सफाई कर्मचारी", "घरेलू काम"],
@@ -125,6 +128,7 @@
     };
 
     let map, markers = [];
+    let userLoc = [26.9124, 75.7873]; // Default location
 
     window.onload = () => {
         const rc = document.getElementById('reg-category'), sc = document.getElementById('search-category');
@@ -137,14 +141,23 @@
 
     function initMap() {
         if(map) map.remove();
-        map = L.map('map').setView([26.9124, 75.7873], 12);
+        map = L.map('map').setView(userLoc, 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // आपकी असली लोकेशन ढूँढना
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                userLoc = [position.coords.latitude, position.coords.longitude];
+                map.setView(userLoc, 13);
+                L.marker(userLoc).addTo(map).bindPopup("आप यहाँ हैं").openPopup();
+            });
+        }
         setTimeout(() => map.invalidateSize(), 500);
     }
 
     function updateSub(cid, sid) {
         const c = document.getElementById(cid).value, s = document.getElementById(sid);
-        s.innerHTML = '<option>सब-कैटेगरी चुनें</option>';
+        s.innerHTML = (cid === 'search-category') ? '<option value="All">सभी काम</option>' : '<option>सब-कैटेगरी चुनें</option>';
         if(CATS[c]) CATS[c].forEach(v => s.add(new Option(v, v)));
     }
 
@@ -174,24 +187,25 @@
         const p = document.getElementById('search-pincode').value;
         const v = document.getElementById('search-village').value;
         const c = document.getElementById('search-category').value;
+        const s = document.getElementById('search-sub').value;
         const list = document.getElementById('results-list');
         list.innerHTML = "खोज रहे हैं...";
         
-        // पुराने मार्कर्स हटाओ
         markers.forEach(m => map.removeLayer(m));
         markers = [];
 
         let q = db.collection('listings').where('pincode', '==', p);
         if(v !== 'All') q = q.where('village', '==', v);
         if(c !== 'All') q = q.where('category', '==', c);
+        if(s !== 'All' && s !== 'सभी काम') q = q.where('subcategory', '==', s);
 
         const snap = await q.get();
         list.innerHTML = snap.empty ? "<p style='text-align:center; padding:20px;'>कोई वर्कर नहीं मिला।</p>" : "";
         
         snap.forEach(doc => {
             const w = doc.data();
-            // मैप पर मार्कर और ऊपर नाम लिखना
-            let m = L.marker([26.9124, 75.7873]).addTo(map).bindPopup(`<b>${w.name}</b><br>${w.subcategory}`);
+            // वर्कर को मैप पर दिखाना (यहाँ आपकी लोकेशन के पास रैंडम दिखाया है, असली डेटा के लिए lat-lng चाहिए)
+            let m = L.marker(userLoc).addTo(map).bindPopup(`<b>${w.name}</b><br>${w.subcategory}`);
             m.bindTooltip(w.subcategory, {permanent: true, direction: 'top'}).openTooltip();
             markers.push(m);
 
